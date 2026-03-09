@@ -22,6 +22,7 @@ struct SignUpView: View {
     @State private var isPasswordVisible: Bool = false
     @State private var isConfirmPasswordVisible: Bool = false
     @State private var agreeToTerms: Bool = false
+    @State private var navigateToProfile: Bool = false
     
     var isFormValid: Bool {
         !fullName.isEmpty && !email.isEmpty && !phoneNumber.isEmpty &&
@@ -55,6 +56,19 @@ struct SignUpView: View {
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 16)
+                    
+                    // Login Link
+                    HStack {
+                        Text("Already have an account?")
+                            .font(.system(size: 16))
+                            .foregroundColor(.gray)
+                        
+                        NavigationLink(destination: LoginView(appState: appState)) {
+                            Text("Login")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
+                        }
+                    }.padding(.top, 10)
                     
                     // Logo and Title
                     VStack(spacing: 12) {
@@ -135,7 +149,7 @@ struct SignUpView: View {
                             .padding().background(Color.red.opacity(0.1)).cornerRadius(12)
                         }
                         
-                        // Sign Up Button
+                        // Sign Up Button - FIXED: Now navigates to UserProfileView
                         Button(action: handleSignUp) {
                             HStack {
                                 if authManager.isLoading {
@@ -151,14 +165,17 @@ struct SignUpView: View {
                         }
                         .disabled(authManager.isLoading || !isFormValid)
                         .opacity(isFormValid ? 1.0 : 0.6)
+                        .navigationDestination(isPresented: $navigateToProfile) {
+                            UserProfileView().environmentObject(appState)
+                        }
                         
-                        // Login Link
-                        HStack {
-                            Text("Already have an account?").font(.system(size: 14)).foregroundColor(.gray)
-                            Button(action: { dismiss() }) {
-                                Text("Login").font(.system(size: 14, weight: .bold)).foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
-                            }
-                        }.padding(.top, 10)
+                        // ADDED: Link to Edit Profile (for testing/access)
+                        NavigationLink(destination: EditProfileView().environmentObject(appState)) {
+                            Text("Edit Profile")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
+                                .padding(.top, 8)
+                        }
                     }
                     .padding(.horizontal, 24)
                     Spacer().frame(height: 40)
@@ -171,17 +188,27 @@ struct SignUpView: View {
     func handleSignUp() {
         let userType: String
         switch appState.selectedRole {
-        case .petOwner:        userType = "petOwner"
-        case .serviceProvider: userType = "serviceProvider"
-        case .businessClient:  userType = "businessClient"
-        case .none:            userType = "petOwner"
+        case .petOwner:        userType = "pet_owner"
+        case .serviceProvider: userType = "service_provider"
+        case .businessClient:  userType = "business_client"
+        case .none:            userType = "pet_owner"
         }
         
         authManager.signUp(email: email, password: password, fullName: fullName, phoneNumber: phoneNumber, userType: userType) { success in
             if success {
-                
+                // FIXED: Set user data and save to UserDefaults
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    appState.currentUserName = fullName
+                    appState.currentUserEmail = email
+                    
+                    // Save user data to UserDefaults
+                    let userData = UserData(name: fullName, email: email, role: userType)
+                    if let encoded = try? JSONEncoder().encode(userData) {
+                        UserDefaults.standard.set(encoded, forKey: "userData")
+                    }
+                    
                     appState.isLoggedIn = true
+                    navigateToProfile = true
                 }
             }
         }

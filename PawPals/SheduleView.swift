@@ -1,5 +1,5 @@
 //
-//  SheduleView.swift
+//  ScheduleView.swift
 //  PawPals
 //
 //  Created by user286283 on 2/5/26.
@@ -8,9 +8,11 @@
 import SwiftUI
 
 struct ScheduleView: View {
+    @EnvironmentObject var appState: AppState
     @Environment(\.dismiss) var dismiss
     @State private var selectedFilter: String = "All"
     @State private var selectedDate: Date = Date()
+    @State private var selectedTab = 1 // Schedule tab
     
     let filterOptions = ["All", "Upcoming", "Past", "Cancelled"]
     
@@ -132,7 +134,15 @@ struct ScheduleView: View {
             
             VStack(spacing: 0) {
                 // Top Header
-                HStack {
+                HStack
+                {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
+                    }
                     Text("Schedule")
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.black)
@@ -255,10 +265,10 @@ struct ScheduleView: View {
                 }
             }
             
-            // Bottom Navigation
+            // Bottom Navigation - FIXED
             VStack {
                 Spacer()
-                BottomNavigationBar(selectedTab: .constant(2))
+                BottomNavigationBar(selectedTab: $selectedTab, appState: appState)
             }
         }
         .navigationBarHidden(true)
@@ -484,5 +494,6 @@ enum AppointmentStatus {
 struct ScheduleView_Previews: PreviewProvider {
     static var previews: some View {
         ScheduleView()
+            .environmentObject(AppState())
     }
 }

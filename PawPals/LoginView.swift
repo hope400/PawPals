@@ -156,21 +156,6 @@ struct LoginView: View {
                         .disabled(authManager.isLoading || email.isEmpty || password.isEmpty)
                         .opacity(email.isEmpty || password.isEmpty ? 0.6 : 1.0)
                         
-                        // Divider
-                        HStack {
-                            Rectangle().fill(Color.gray.opacity(0.3)).frame(height: 1)
-                            Text("OR").font(.system(size: 14, weight: .semibold)).foregroundColor(.gray).padding(.horizontal, 10)
-                            Rectangle().fill(Color.gray.opacity(0.3)).frame(height: 1)
-                        }
-                        .padding(.vertical, 10)
-                        
-                        // Social Login Buttons
-                        HStack(spacing: 20) {
-                            SocialLoginButton(icon: "applelogo", action: { print("Apple - Coming soon") })
-                            SocialLoginButton(icon: "g.circle.fill", action: { print("Google - Coming soon") })
-                            SocialLoginButton(icon: "f.circle.fill", action: { print("Facebook - Coming soon") })
-                        }
-                        
                         // Sign Up Link
                         HStack {
                             Text("Don't have an account?")
@@ -196,18 +181,40 @@ struct LoginView: View {
     func handleLogin() {
         authManager.login(email: email, password: password) { success in
             if success {
-                // Set role from Firebase
-                if let userType = authManager.currentUser?.userType {
-                    switch userType {
-                    case "petOwner":        appState.selectedRole = .petOwner
-                    case "serviceProvider": appState.selectedRole = .serviceProvider
-                    case "businessClient":  appState.selectedRole = .businessClient
-                    default:                appState.selectedRole = .petOwner
-                    }
-                }
-                
-               
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    // Get user data from Firebase
+                    let userName = authManager.currentUser?.fullName ?? "User"
+                    let userEmail = authManager.currentUser?.email ?? email
+                    let userTypeString = authManager.currentUser?.userType ?? "petOwner"
+                    
+                    // Set user data in appState
+                    appState.currentUserName = userName
+                    appState.currentUserEmail = userEmail
+                    
+                    // Convert and set role
+                    let roleString: String
+                    switch userTypeString {
+                    case "petOwner":
+                        appState.selectedRole = .petOwner
+                        roleString = "pet_owner"
+                    case "serviceProvider":
+                        appState.selectedRole = .serviceProvider
+                        roleString = "service_provider"
+                    case "businessClient":
+                        appState.selectedRole = .businessClient
+                        roleString = "business_client"
+                    default:
+                        appState.selectedRole = .petOwner
+                        roleString = "pet_owner"
+                    }
+                    
+                    // FIXED: Save user data to UserDefaults for "Welcome back" feature
+                    let userData = UserData(name: userName, email: userEmail, role: roleString)
+                    if let encoded = try? JSONEncoder().encode(userData) {
+                        UserDefaults.standard.set(encoded, forKey: "userData")
+                    }
+                    
+                    // Set logged in
                     appState.isLoggedIn = true
                 }
             }

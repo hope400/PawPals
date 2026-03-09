@@ -57,6 +57,7 @@ struct PaymentView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .background(Color(red: 0.97, green: 0.96, blue: 0.97))
+                .frame(height: 56)
                 
                 ScrollView {
                     VStack(spacing: 24) {

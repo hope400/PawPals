@@ -13,96 +13,100 @@ struct RoleSelectionView: View {
     
     var body: some View {
         ZStack {
-                // Background color
-                Color(red: 0.96, green: 0.96, blue: 0.97)
-                    .ignoresSafeArea()
+            // Background color
+            Color(red: 0.96, green: 0.96, blue: 0.97)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Header with standard height
+                HStack {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
+                    }
+                    
+                    Spacer()
+                    
+                    Text("Role Selection")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.black)
+                    
+                    Spacer()
+                    
+                    // Invisible spacer for balance
+                    Color.clear
+                        .frame(width: 44, height: 44)
+                }
+                .padding(.horizontal, 20)
+                .frame(height: 56)
                 
-                VStack(spacing: 0) {
-                    // Header
-                    HStack {
-                        Button(action: {
-                            dismiss()
-                        }) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 20, weight: .semibold))
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // Title section
+                        VStack(spacing: 12) {
+                            Text("Who are you?")
+                                .font(.system(size: 36, weight: .bold))
+                                .foregroundColor(.black)
+                            
+                            Text("Choose your profile type to get started")
+                                .font(.system(size: 16))
                                 .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
                         }
-                        .padding(.leading, 20)
+                        .padding(.top, 32)
                         
-                        Spacer()
-                        
-                        Text("Role Selection")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.black)
-                        
-                        Spacer()
-                        
-                        // Invisible spacer for balance
-                        Color.clear
-                            .frame(width: 44)
-                    }
-                    .padding(.top, 16)
-                    
-                    ScrollView {
-                        VStack(spacing: 24) {
-                            // Title section
-                            VStack(spacing: 12) {
-                                Text("Who are you?")
-                                    .font(.system(size: 36, weight: .bold))
-                                    .foregroundColor(.black)
-                                
-                                Text("Choose your profile type to get started")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
-                            }
-                            .padding(.top, 32)
-                            
-                            // Role Cards
-                            VStack(spacing: 20) {
-                                // Pet Owner Card
-                                RoleCard(
+                        // Role Cards
+                        VStack(spacing: 20) {
+                            // Pet Owner Card
+                            RoleCard(
                                     backgroundColor: Color(red: 0.98, green: 0.96, blue: 0.91),
                                     icon: "pawprint.fill",
                                     iconColor: Color(red: 0.6, green: 0.4, blue: 0.9),
                                     title: "Pet Owner",
                                     description: "I'm looking for high-quality care and services for my pet",
-                                    imageName: "person-dog", // Placeholder
+                                    imageName: "person-dog",
                                     appState: appState,
-                                    role: .petOwner
+                                    role: .petOwner,
+                                    destination: AnyView(SignUpView(appState: appState))
                                 )
-                                
-                                // Service Provider Card
-                                RoleCard(
+                            
+                            // Service Provider Card
+                            RoleCard(
                                     backgroundColor: Color(red: 0.96, green: 0.88, blue: 0.73),
                                     icon: "scissors",
                                     iconColor: Color(red: 0.6, green: 0.4, blue: 0.9),
                                     title: "Service Provider",
                                     description: "I want to offer sitting, walking, or grooming services",
-                                    imageName: "person-cat", // Placeholder
+                                    imageName: "person-cat",
                                     appState: appState,
-                                    role: .serviceProvider
+                                    role: .serviceProvider,
+                                    destination: AnyView(SignUpView(appState: appState))
                                 )
-                                
-                                // Business Client Card
-                                RoleCard(
+                            
+                            // Business Client Card
+                            RoleCard(
                                     backgroundColor: Color(red: 0.85, green: 0.92, blue: 0.73),
                                     icon: "building.2.fill",
                                     iconColor: Color(red: 0.6, green: 0.4, blue: 0.9),
                                     title: "Business Client",
                                     description: "I represent a veterinary clinic or a pet retail business",
-                                    imageName: "business-building", // Placeholder
+                                    imageName: "business-building",
                                     appState: appState,
-                                    role: .businessClient
+                                    role: .businessClient,
+                                    destination: AnyView(SignUpView(appState: appState))
                                 )
-                            }
-                            .padding(.horizontal, 20)
-                            .padding(.bottom, 30)
                         }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 30)
                     }
                 }
             }
         }
+        .navigationBarHidden(true)
     }
+}
 
 
 // Reusable Role Card Component
@@ -115,6 +119,7 @@ struct RoleCard: View {
     let imageName: String
     @ObservedObject var appState: AppState
     let role: UserRole
+    let destination: AnyView
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -155,8 +160,8 @@ struct RoleCard: View {
                 
                 Spacer()
                 
-                // Select button with NavigationLink
-                NavigationLink(destination: LoginView(appState: appState)) {
+                // Select button with NavigationLink to specific home view
+                NavigationLink(destination: destination) {
                     Text("Select")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.white)
@@ -189,5 +194,6 @@ struct RoleCard: View {
 struct RoleSelectionView_Previews: PreviewProvider {
     static var previews: some View {
         RoleSelectionView()
+            .environmentObject(AppState())
     }
 }

@@ -7,13 +7,16 @@
 import SwiftUI
 
 struct EditProfileView: View {
+    @EnvironmentObject var appState: AppState
     @Environment(\.dismiss) var dismiss
-    @State private var fullName: String = "Alex Johnson"
-    @State private var bio: String = "Dog lover & volunteer walker"
-    @State private var email: String = "alex.johnson@email.com"
-    @State private var phone: String = "+1 (555) 123-4567"
+    
+    @State private var fullName: String = ""
+    @State private var bio: String = ""
+    @State private var email: String = ""
+    @State private var phone: String = ""
     @State private var showImagePicker: Bool = false
     @State private var selectedImage: UIImage?
+    @State private var showSavedAlert: Bool = false
     
     var body: some View {
         ZStack {
@@ -61,17 +64,23 @@ struct EditProfileView: View {
                                         .clipShape(Circle())
                                 } else {
                                     Circle()
-                                        .fill(Color.gray.opacity(0.2))
+                                        .fill(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [
+                                                    Color(red: 0.6, green: 0.4, blue: 0.9),
+                                                    Color(red: 0.65, green: 0.5, blue: 0.95)
+                                                ]),
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
+                                        )
                                         .frame(width: 120, height: 120)
                                         .overlay(
-                                            Image(systemName: "person.fill")
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: 50, height: 50)
-                                                .foregroundColor(.gray.opacity(0.5))
+                                            Text(getInitials(from: fullName))
+                                                .font(.system(size: 40, weight: .bold))
+                                                .foregroundColor(.white)
                                         )
                                 }
-                                
                                 
                                 Button(action: {
                                     showImagePicker = true
@@ -215,22 +224,57 @@ struct EditProfileView: View {
         .sheet(isPresented: $showImagePicker) {
             ImagePicker(selectedImage: $selectedImage)
         }
+        .alert("Profile Saved", isPresented: $showSavedAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Your profile has been updated successfully!")
+        }
+        .onAppear {
+            loadUserData()
+        }
+    }
+    
+    func loadUserData() {
+        // Load data from appState when view appears
+        fullName = appState.currentUserName
+        email = appState.currentUserEmail
+        bio = "Dog lover & volunteer walker" // Default bio, you can add this to AppState if needed
+        phone = "+1 (555) 123-4567" // Default phone, you can add this to AppState if needed
     }
     
     func saveProfile() {
-        // TODO: Save profile to CoreData/Firebase
+        // Save updated data back to appState
+        appState.currentUserName = fullName
+        appState.currentUserEmail = email
+        
+        // TODO: Save profile to Firebase/CoreData
         print("Saving profile:")
         print("Name: \(fullName)")
         print("Bio: \(bio)")
         print("Email: \(email)")
         print("Phone: \(phone)")
         
-        dismiss()
+        // Show success alert
+        showSavedAlert = true
+        
+        // Dismiss after a short delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            dismiss()
+        }
+    }
+    
+    func getInitials(from name: String) -> String {
+        let components = name.components(separatedBy: " ")
+        let initials = components.prefix(2).compactMap { $0.first }.map { String($0) }
+        return initials.joined().uppercased()
     }
 }
 
 struct EditProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        EditProfileView()
+        NavigationStack {
+            EditProfileView()
+                .environmentObject(AppState())
+        }
     }
 }

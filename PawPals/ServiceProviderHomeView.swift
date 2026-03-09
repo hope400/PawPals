@@ -8,16 +8,37 @@
 import SwiftUI
 
 struct ServiceProviderHomeView: View {
+    @EnvironmentObject var appState: AppState
     @State private var selectedTab = 0
     
     var body: some View {
-        ZStack {
-            // Background
-            Color(red: 0.97, green: 0.96, blue: 0.97)
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                Color(red: 0.97, green: 0.96, blue: 0.97)
+                    .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Top Header
+                // Back button - ISSUE 1 FIXED: Links to RoleSelectionView
+                HStack {
+                    NavigationLink(destination: RoleSelectionView().environmentObject(appState)) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .semibold))
+                            Text("Back")
+                                .font(.system(size: 16, weight: .semibold))
+                        }
+                        .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
+                    }
+                    .simultaneousGesture(TapGesture().onEnded {
+                        appState.isLoggedIn = false
+                    })
+                    .padding(.leading, 24)
+                    
+                    Spacer()
+                }
+                .padding(.top, 12)
+
+                // Top Header - ISSUE 2 FIXED: Shows service provider name
                 HStack(spacing: 12) {
                     // Profile picture
                     Circle()
@@ -33,9 +54,9 @@ struct ServiceProviderHomeView: View {
                         )
                         .frame(width: 44, height: 44)
                     
-                    // Greeting text
+                    // Greeting text with user name from appState
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Welcome Back!")
+                        Text("Hello, \(appState.currentUserName)!")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.black)
                         
@@ -118,26 +139,80 @@ struct ServiceProviderHomeView: View {
                                 .padding(.horizontal, 16)
                             
                             HStack(spacing: 12) {
-                                ProviderQuickActionButton(
-                                    icon: "calendar.badge.plus",
-                                    title: "Set\nAvailability",
-                                    backgroundColor: Color.blue.opacity(0.1),
-                                    iconColor: Color.blue
-                                )
+                                // 1. Set Availability → ScheduleView
+                                NavigationLink(destination: ScheduleView().environmentObject(appState)) {
+                                    VStack(spacing: 12) {
+                                        Circle()
+                                            .fill(Color.blue.opacity(0.1))
+                                            .frame(width: 48, height: 48)
+                                            .overlay(
+                                                Image(systemName: "calendar.badge.plus")
+                                                    .font(.system(size: 22))
+                                                    .foregroundColor(Color.blue)
+                                            )
+                                        
+                                        Text("Set\nAvailability")
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundColor(.black)
+                                            .multilineTextAlignment(.center)
+                                            .lineLimit(2)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .background(Color.white)
+                                    .cornerRadius(12)
+                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                                }
                                 
-                                ProviderQuickActionButton(
-                                    icon: "person.2",
-                                    title: "View\nClients",
-                                    backgroundColor: Color.purple.opacity(0.1),
-                                    iconColor: Color.purple
-                                )
+                                // 2. View Clients → ServiceProvidersListView
+                                NavigationLink(destination: ServiceProvidersListView()) {
+                                    VStack(spacing: 12) {
+                                        Circle()
+                                            .fill(Color.purple.opacity(0.1))
+                                            .frame(width: 48, height: 48)
+                                            .overlay(
+                                                Image(systemName: "person.2")
+                                                    .font(.system(size: 22))
+                                                    .foregroundColor(Color.purple)
+                                            )
+                                        
+                                        Text("View\nClients")
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundColor(.black)
+                                            .multilineTextAlignment(.center)
+                                            .lineLimit(2)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .background(Color.white)
+                                    .cornerRadius(12)
+                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                                }
                                 
-                                ProviderQuickActionButton(
-                                    icon: "chart.line.uptrend.xyaxis",
-                                    title: "View\nEarnings",
-                                    backgroundColor: Color.green.opacity(0.1),
-                                    iconColor: Color.green
-                                )
+                                // 3. View Earnings → PaymentMethodsView (or create PaymentView)
+                                NavigationLink(destination: PaymentMethodsView()) {
+                                    VStack(spacing: 12) {
+                                        Circle()
+                                            .fill(Color.green.opacity(0.1))
+                                            .frame(width: 48, height: 48)
+                                            .overlay(
+                                                Image(systemName: "chart.line.uptrend.xyaxis")
+                                                    .font(.system(size: 22))
+                                                    .foregroundColor(Color.green)
+                                            )
+                                        
+                                        Text("View\nEarnings")
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundColor(.black)
+                                            .multilineTextAlignment(.center)
+                                            .lineLimit(2)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .background(Color.white)
+                                    .cornerRadius(12)
+                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                                }
                             }
                             .padding(.horizontal, 16)
                         }
@@ -148,13 +223,14 @@ struct ServiceProviderHomeView: View {
                 }
             }
             
-            // Bottom Navigation
+            // Bottom Navigation - ISSUE 3 FIXED: Uses same BottomNavigationBar as PetOwnerHomeView
             VStack {
                 Spacer()
-                ServiceProviderBottomNav(selectedTab: $selectedTab)
+                BottomNavigationBar(selectedTab: $selectedTab, appState: appState)
             }
         }
         .navigationBarHidden(true)
+        }
     }
 }
 
@@ -282,67 +358,9 @@ struct ProviderQuickActionButton: View {
     }
 }
 
-// MARK: - Service Provider Bottom Nav
-struct ServiceProviderBottomNav: View {
-    @Binding var selectedTab: Int
-    
-    var body: some View {
-        HStack {
-            NavButton(icon: "house.fill", title: "Home", isSelected: selectedTab == 0) {
-                selectedTab = 0
-            }
-            Spacer()
-            NavButton(icon: "calendar", title: "Schedule", isSelected: selectedTab == 1) {
-                selectedTab = 1
-            }
-            Spacer()
-            Color.clear.frame(width: 56)
-            Spacer()
-            NavButton(icon: "message.fill", title: "Messages", isSelected: selectedTab == 2) {
-                selectedTab = 2
-            }
-            Spacer()
-            NavButton(icon: "person.fill", title: "Profile", isSelected: selectedTab == 3) {
-                selectedTab = 3
-            }
-        }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 20)
-        .frame(height: 85)
-        .background(Color.white.opacity(0.95))
-        .overlay(
-            Rectangle()
-                .fill(Color.gray.opacity(0.2))
-                .frame(height: 1),
-            alignment: .top
-        )
-    }
-}
-
-// MARK: - Nav Button
-struct NavButton: View {
-    let icon: String
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 22))
-                    .foregroundColor(isSelected ? Color.blue : .gray)
-                
-                Text(title)
-                    .font(.system(size: 10, weight: isSelected ? .bold : .medium))
-                    .foregroundColor(isSelected ? Color.blue : .gray)
-            }
-        }
-    }
-}
-
 struct ServiceProviderHomeView_Previews: PreviewProvider {
     static var previews: some View {
         ServiceProviderHomeView()
+            .environmentObject(AppState())
     }
 }

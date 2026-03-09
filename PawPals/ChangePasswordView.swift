@@ -277,7 +277,7 @@ struct ChangePasswordView: View {
         let credential = EmailAuthProvider.credential(withEmail: email, password: currentPassword)
         
         user.reauthenticate(with: credential) { result, error in
-            if let error = error {
+            if error != nil {
                 authManager.isLoading = false
                 authManager.errorMessage = "Current password is incorrect"
                 return

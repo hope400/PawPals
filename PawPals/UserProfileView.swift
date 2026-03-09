@@ -83,7 +83,7 @@ struct UserProfileView: View {
                             
                             // User Info
                             VStack(spacing: 4) {
-                                Text("Alex Johnson")
+                                Text(appState.currentUserName)
                                     .font(.system(size: 24, weight: .bold))
                                     .foregroundColor(.black)
                                 
@@ -202,23 +202,21 @@ struct UserProfileView: View {
                 }
             }
             
-            // Bottom Navigation
+            // Bottom Navigation - FIXED: replaced <#AppState#> with appState
             VStack {
                 Spacer()
-                BottomNavigationBar(selectedTab: $selectedTab)
+                BottomNavigationBar(selectedTab: $selectedTab, appState: appState)
             }
         }
         .navigationBarHidden(true)
     }
     
-    // 
     func handleLogout() {
         do {
             try Auth.auth().signOut()
-            appState.selectedRole = .none
-            appState.isLoggedIn = false  // ContentView switches back to welcome!
+            appState.logout() // Using the logout method from AppState
         } catch {
-            print(" Logout error: \(error.localizedDescription)")
+            print("Logout error: \(error.localizedDescription)")
         }
     }
 }
@@ -328,5 +326,6 @@ struct NotificationsView: View {
 struct UserProfileView_Previews: PreviewProvider {
     static var previews: some View {
         UserProfileView()
+            .environmentObject(AppState())
     }
 }

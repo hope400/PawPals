@@ -1,5 +1,5 @@
 //
-//  BussinessClientHomeView.swift
+//  BusinessClientHomeView.swift
 //  PawPals
 //
 //  Created by user286283 on 2/5/26.
@@ -7,16 +7,38 @@
 import SwiftUI
 
 struct BusinessClientHomeView: View {
+    @EnvironmentObject var appState: AppState
     @State private var selectedTab = 0
     
     var body: some View {
-        ZStack {
-            // Background
-            Color(red: 0.97, green: 0.96, blue: 0.97)
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                // Background
+                Color(red: 0.97, green: 0.96, blue: 0.97)
+                    .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Top Header
+                // Back button - ISSUE 1 FIXED: Links to RoleSelectionView
+                HStack {
+                    NavigationLink(destination: RoleSelectionView().environmentObject(appState)) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .semibold))
+                            Text("Back")
+                                .font(.system(size: 16, weight: .semibold))
+                        }
+                        .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
+                    }
+                    .simultaneousGesture(TapGesture().onEnded {
+                        appState.isLoggedIn = false
+                    })
+                    .padding(.leading, 24)
+                    
+                    Spacer()
+                }
+                .padding(.top, 12)
+
+                // Top Header - ISSUE 2 FIXED: Shows business client name
                 HStack(spacing: 12) {
                     // Business logo
                     RoundedRectangle(cornerRadius: 8)
@@ -37,9 +59,9 @@ struct BusinessClientHomeView: View {
                                 .font(.system(size: 20))
                         )
                     
-                    // Business name
+                    // Business greeting with user name from appState
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Paws & Claws Clinic")
+                        Text("Hello, \(appState.currentUserName)!")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.black)
                         
@@ -150,23 +172,86 @@ struct BusinessClientHomeView: View {
                                 .padding(.horizontal, 16)
                             
                             VStack(spacing: 12) {
-                                BusinessActionButton(
-                                    icon: "calendar.badge.plus",
-                                    title: "Add Appointment",
-                                    color: Color.orange
-                                )
+                                // 1. Add Appointment → ScheduleView
+                                NavigationLink(destination: ScheduleView().environmentObject(appState)) {
+                                    HStack(spacing: 12) {
+                                        Circle()
+                                            .fill(Color.orange.opacity(0.1))
+                                            .frame(width: 44, height: 44)
+                                            .overlay(
+                                                Image(systemName: "calendar.badge.plus")
+                                                    .font(.system(size: 20))
+                                                    .foregroundColor(Color.orange)
+                                            )
+                                        
+                                        Text("Add Appointment")
+                                            .font(.system(size: 16, weight: .semibold))
+                                            .foregroundColor(.black)
+                                        
+                                        Spacer()
+                                        
+                                        Image(systemName: "chevron.right")
+                                            .foregroundColor(.gray)
+                                    }
+                                    .padding(12)
+                                    .background(Color.white)
+                                    .cornerRadius(12)
+                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                                }
                                 
-                                BusinessActionButton(
-                                    icon: "person.badge.plus",
-                                    title: "Add New Client",
-                                    color: Color.purple
-                                )
+                                // 2. Add New Client → AddPetView
+                                NavigationLink(destination: AddPetView().environmentObject(appState)) {
+                                    HStack(spacing: 12) {
+                                        Circle()
+                                            .fill(Color.purple.opacity(0.1))
+                                            .frame(width: 44, height: 44)
+                                            .overlay(
+                                                Image(systemName: "person.badge.plus")
+                                                    .font(.system(size: 20))
+                                                    .foregroundColor(Color.purple)
+                                            )
+                                        
+                                        Text("Add New Client")
+                                            .font(.system(size: 16, weight: .semibold))
+                                            .foregroundColor(.black)
+                                        
+                                        Spacer()
+                                        
+                                        Image(systemName: "chevron.right")
+                                            .foregroundColor(.gray)
+                                    }
+                                    .padding(12)
+                                    .background(Color.white)
+                                    .cornerRadius(12)
+                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                                }
                                 
-                                BusinessActionButton(
-                                    icon: "chart.bar",
-                                    title: "View Analytics",
-                                    color: Color.blue
-                                )
+                                // 3. View Analytics → BookingDetailsView
+                                NavigationLink(destination: BookingDetailsView()) {
+                                    HStack(spacing: 12) {
+                                        Circle()
+                                            .fill(Color.blue.opacity(0.1))
+                                            .frame(width: 44, height: 44)
+                                            .overlay(
+                                                Image(systemName: "chart.bar")
+                                                    .font(.system(size: 20))
+                                                    .foregroundColor(Color.blue)
+                                            )
+                                        
+                                        Text("View Analytics")
+                                            .font(.system(size: 16, weight: .semibold))
+                                            .foregroundColor(.black)
+                                        
+                                        Spacer()
+                                        
+                                        Image(systemName: "chevron.right")
+                                            .foregroundColor(.gray)
+                                    }
+                                    .padding(12)
+                                    .background(Color.white)
+                                    .cornerRadius(12)
+                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                                }
                             }
                             .padding(.horizontal, 16)
                         }
@@ -177,10 +262,10 @@ struct BusinessClientHomeView: View {
                 }
             }
             
-            // Bottom Navigation
+            // Bottom Navigation - ISSUE 3 FIXED: Uses same BottomNavigationBar as PetOwnerHomeView
             VStack {
                 Spacer()
-                BusinessBottomNav(selectedTab: $selectedTab)
+                BottomNavigationBar(selectedTab: $selectedTab, appState: appState)
             }
         }
         .navigationBarHidden(true)
@@ -315,69 +400,10 @@ struct BusinessActionButton: View {
     }
 }
 
-// MARK: - Business Bottom Nav
-struct BusinessBottomNav: View {
-    @Binding var selectedTab: Int
-    
-    var body: some View {
-        HStack {
-            BusinessNavButton(icon: "house.fill", title: "Home", isSelected: selectedTab == 0) {
-                selectedTab = 0
-            }
-            Spacer()
-            BusinessNavButton(icon: "calendar", title: "Appointments", isSelected: selectedTab == 1) {
-                selectedTab = 1
-            }
-            Spacer()
-            BusinessNavButton(icon: "person.2", title: "Clients", isSelected: selectedTab == 2) {
-                selectedTab = 2
-            }
-            Spacer()
-            BusinessNavButton(icon: "chart.bar", title: "Analytics", isSelected: selectedTab == 3) {
-                selectedTab = 3
-            }
-            Spacer()
-            BusinessNavButton(icon: "gearshape", title: "Settings", isSelected: selectedTab == 4) {
-                selectedTab = 4
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.bottom, 20)
-        .frame(height: 85)
-        .background(Color.white.opacity(0.95))
-        .overlay(
-            Rectangle()
-                .fill(Color.gray.opacity(0.2))
-                .frame(height: 1),
-            alignment: .top
-        )
-    }
-}
-
-// MARK: - Business Nav Button
-struct BusinessNavButton: View {
-    let icon: String
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                    .foregroundColor(isSelected ? Color.orange : .gray)
-                
-                Text(title)
-                    .font(.system(size: 9, weight: isSelected ? .bold : .medium))
-                    .foregroundColor(isSelected ? Color.orange : .gray)
-            }
-        }
-    }
-}
-
 struct BusinessClientHomeView_Previews: PreviewProvider {
     static var previews: some View {
         BusinessClientHomeView()
+            .environmentObject(AppState())
+        }
     }
 }

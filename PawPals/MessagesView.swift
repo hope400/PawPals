@@ -8,9 +8,11 @@
 import SwiftUI
 
 struct MessagesView: View {
+    @EnvironmentObject var appState: AppState
     @Environment(\.dismiss) var dismiss
     @State private var searchText: String = ""
     @State private var selectedFilter: String = "All"
+    @State private var selectedTab = 2 // Messages tab
     
     let filterOptions = ["All", "Unread", "Service Providers", "Support"]
     
@@ -232,10 +234,10 @@ struct MessagesView: View {
                 }
             }
             
-            // Bottom Navigation
+            // Bottom Navigation - FIXED
             VStack {
                 Spacer()
-                BottomNavigationBar(selectedTab: .constant(3))
+                BottomNavigationBar(selectedTab: $selectedTab, appState: appState)
             }
         }
         .navigationBarHidden(true)
@@ -689,5 +691,6 @@ struct ChatMessage: Identifiable {
 struct MessagesView_Previews: PreviewProvider {
     static var previews: some View {
         MessagesView()
+            .environmentObject(AppState())
     }
 }

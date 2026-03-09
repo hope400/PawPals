@@ -60,8 +60,8 @@ struct BookServiceView: View {
                     Color.clear
                         .frame(width: 44)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .padding(.horizontal, 20)
+                .frame(height: 56)
                 .background(Color(red: 0.97, green: 0.96, blue: 0.97))
                 .overlay(
                     Rectangle()
