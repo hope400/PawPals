@@ -141,7 +141,7 @@ struct PetOwnerHomeView: View {
                             }
                             .padding(.vertical, 16)
                             
-                            // Your Next Booking Section - View Details button removed
+                           
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Your Next Booking")
                                     .font(.system(size: 18, weight: .bold))
@@ -195,7 +195,7 @@ struct PetOwnerHomeView: View {
                             }
                             .padding(.bottom, 24)
                             
-                            // Quick Actions - FIXED WITH NAVIGATION
+                         
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Quick Actions")
                                     .font(.system(size: 18, weight: .bold))
@@ -203,7 +203,7 @@ struct PetOwnerHomeView: View {
                                     .padding(.horizontal, 16)
                                 
                                 HStack(spacing: 12) {
-                                    // 1. Find a Sitter → ServiceProvidersListView
+                                   
                                     NavigationLink(destination: ServiceProvidersListView()) {
                                         VStack(spacing: 12) {
                                             Circle()
@@ -229,7 +229,7 @@ struct PetOwnerHomeView: View {
                                         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                                     }
                                     
-                                    // 2. Book a Vet → ServiceProvidersListView (TEMP)
+                              
                                     NavigationLink(destination: ServiceProvidersListView()) {
                                         VStack(spacing: 12) {
                                             Circle()
@@ -255,7 +255,7 @@ struct PetOwnerHomeView: View {
                                         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                                     }
                                     
-                                    // 3. Track Walk → Opens Maps (TEMP)
+                                   
                                     Button(action: {
                                         openMaps()
                                     }) {
@@ -342,7 +342,7 @@ struct PetOwnerHomeView: View {
     
     // MARK: - Helper Function to Open Maps
     func openMaps() {
-        // Open Apple Maps with a default location (Central Park)
+       
         let latitude = 40.785091
         let longitude = -73.968285
         let mapURL = URL(string: "http://maps.apple.com/?ll=\(latitude),\(longitude)&q=Dog%20Walking")
