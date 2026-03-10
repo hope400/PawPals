@@ -113,7 +113,7 @@ struct PaymentView: View {
                             .padding(.horizontal, 16)
                         }
                         
-                        // Card Details (only show if Card is selected)
+
                         if selectedPaymentMethod == "Card" {
                             VStack(spacing: 16) {
                                 // Card Number
@@ -139,7 +139,7 @@ struct PaymentView: View {
                                     )
                                 }
                                 
-                                // Expiry and CVV
+                        
                                 HStack(spacing: 12) {
                                     VStack(alignment: .leading, spacing: 8) {
                                         Text("Expiry Date")
@@ -207,7 +207,7 @@ struct PaymentView: View {
                             .padding(.horizontal, 16)
                         }
                         
-                        // Apple Pay / Google Pay Message
+            
                         if selectedPaymentMethod == "Apple Pay" {
                             VStack(spacing: 12) {
                                 Image(systemName: "apple.logo")
