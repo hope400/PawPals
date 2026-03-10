@@ -149,7 +149,7 @@ struct SignUpView: View {
                             .padding().background(Color.red.opacity(0.1)).cornerRadius(12)
                         }
                         
-                        // Sign Up Button - FIXED: Now navigates to UserProfileView
+                        
                         Button(action: handleSignUp) {
                             HStack {
                                 if authManager.isLoading {
@@ -169,7 +169,7 @@ struct SignUpView: View {
                             UserProfileView().environmentObject(appState)
                         }
                         
-                        // ADDED: Link to Edit Profile (for testing/access)
+                    
                         NavigationLink(destination: EditProfileView().environmentObject(appState)) {
                             Text("Edit Profile")
                                 .font(.system(size: 14, weight: .semibold))
@@ -196,12 +196,12 @@ struct SignUpView: View {
         
         authManager.signUp(email: email, password: password, fullName: fullName, phoneNumber: phoneNumber, userType: userType) { success in
             if success {
-                // FIXED: Set user data and save to UserDefaults
+               
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     appState.currentUserName = fullName
                     appState.currentUserEmail = email
                     
-                    // Save user data to UserDefaults
+                
                     let userData = UserData(name: fullName, email: email, role: userType)
                     if let encoded = try? JSONEncoder().encode(userData) {
                         UserDefaults.standard.set(encoded, forKey: "userData")
