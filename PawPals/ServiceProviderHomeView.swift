@@ -18,7 +18,7 @@ struct ServiceProviderHomeView: View {
                     .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Back button - ISSUE 1 FIXED: Links to RoleSelectionView
+               
                 HStack {
                     NavigationLink(destination: RoleSelectionView().environmentObject(appState)) {
                         HStack(spacing: 4) {
@@ -38,7 +38,7 @@ struct ServiceProviderHomeView: View {
                 }
                 .padding(.top, 12)
 
-                // Top Header - ISSUE 2 FIXED: Shows service provider name
+              
                 HStack(spacing: 12) {
                     // Profile picture
                     Circle()
@@ -54,7 +54,7 @@ struct ServiceProviderHomeView: View {
                         )
                         .frame(width: 44, height: 44)
                     
-                    // Greeting text with user name from appState
+                   
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Hello, \(appState.currentUserName)!")
                             .font(.system(size: 18, weight: .bold))
@@ -139,7 +139,7 @@ struct ServiceProviderHomeView: View {
                                 .padding(.horizontal, 16)
                             
                             HStack(spacing: 12) {
-                                // 1. Set Availability → ScheduleView
+                                
                                 NavigationLink(destination: ScheduleView().environmentObject(appState)) {
                                     VStack(spacing: 12) {
                                         Circle()
@@ -164,7 +164,7 @@ struct ServiceProviderHomeView: View {
                                     .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                                 }
                                 
-                                // 2. View Clients → ServiceProvidersListView
+                            
                                 NavigationLink(destination: ServiceProvidersListView()) {
                                     VStack(spacing: 12) {
                                         Circle()
@@ -189,7 +189,7 @@ struct ServiceProviderHomeView: View {
                                     .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                                 }
                                 
-                                // 3. View Earnings → PaymentMethodsView (or create PaymentView)
+                             
                                 NavigationLink(destination: PaymentMethodsView()) {
                                     VStack(spacing: 12) {
                                         Circle()
@@ -223,7 +223,7 @@ struct ServiceProviderHomeView: View {
                 }
             }
             
-            // Bottom Navigation - ISSUE 3 FIXED: Uses same BottomNavigationBar as PetOwnerHomeView
+          
             VStack {
                 Spacer()
                 BottomNavigationBar(selectedTab: $selectedTab, appState: appState)
