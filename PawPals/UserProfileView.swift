@@ -16,12 +16,12 @@ struct UserProfileView: View {
     
     var body: some View {
         ZStack {
-            // Background
+            
             Color(red: 0.97, green: 0.96, blue: 0.97)
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Top Header
+                
                 HStack {
                     Spacer()
                     
@@ -31,7 +31,7 @@ struct UserProfileView: View {
                     
                     Spacer()
                     
-                    // Edit button
+                  
                     NavigationLink(destination: EditProfileView()) {
                         Circle()
                             .fill(Color(red: 0.6, green: 0.4, blue: 0.9).opacity(0.1))
@@ -49,7 +49,7 @@ struct UserProfileView: View {
                 
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Profile Header
+                      
                         VStack(spacing: 16) {
                             // Profile Picture
                             ZStack(alignment: .bottomTrailing) {
@@ -202,7 +202,7 @@ struct UserProfileView: View {
                 }
             }
             
-            // Bottom Navigation - FIXED: replaced <#AppState#> with appState
+            
             VStack {
                 Spacer()
                 BottomNavigationBar(selectedTab: $selectedTab, appState: appState)
@@ -214,7 +214,7 @@ struct UserProfileView: View {
     func handleLogout() {
         do {
             try Auth.auth().signOut()
-            appState.logout() // Using the logout method from AppState
+            appState.logout() 
         } catch {
             print("Logout error: \(error.localizedDescription)")
         }
