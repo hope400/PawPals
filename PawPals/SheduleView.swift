@@ -167,7 +167,7 @@ struct ScheduleView: View {
                 .padding(.bottom, 12)
                 .background(Color(red: 0.97, green: 0.96, blue: 0.97))
                 
-                // Filter Chips
+            
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(filterOptions, id: \.self) { filter in
@@ -264,8 +264,7 @@ struct ScheduleView: View {
                     }
                 }
             }
-            
-            // Bottom Navigation - FIXED
+        
             VStack {
                 Spacer()
                 BottomNavigationBar(selectedTab: $selectedTab, appState: appState)
