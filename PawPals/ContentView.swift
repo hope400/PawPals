@@ -67,7 +67,7 @@ struct ContentView: View {
                             
                             Spacer().frame(height: 30)
                             
-                            // Direct dashboard access button - FIXED
+                            // Direct dashboard access button
                             Button(action: {
                                 // Update app state directly
                                 appState.currentUserName = savedUserData.name
@@ -162,7 +162,7 @@ struct ContentView: View {
                                 }
                             }
                         } else {
-                            // Option to switch account (Logout) - FIXED
+                            // Option to switch account (Logout) 
                             Button(action: {
                                 UserDefaults.standard.removeObject(forKey: "userData")
                                 appState.isLoggedIn = false
