@@ -172,7 +172,7 @@ struct BusinessClientHomeView: View {
                                 .padding(.horizontal, 16)
                             
                             VStack(spacing: 12) {
-                                // 1. Add Appointment → ScheduleView
+                                // 1. Add Appointment
                                 NavigationLink(destination: ScheduleView().environmentObject(appState)) {
                                     HStack(spacing: 12) {
                                         Circle()
@@ -199,7 +199,7 @@ struct BusinessClientHomeView: View {
                                     .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                                 }
                                 
-                                // 2. Add New Client → AddPetView
+                                // 2. Add New Client
                                 NavigationLink(destination: AddPetView().environmentObject(appState)) {
                                     HStack(spacing: 12) {
                                         Circle()
@@ -226,7 +226,7 @@ struct BusinessClientHomeView: View {
                                     .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                                 }
                                 
-                                // 3. View Analytics → BookingDetailsView
+                                // 3. View Analytics 
                                 NavigationLink(destination: BookingDetailsView()) {
                                     HStack(spacing: 12) {
                                         Circle()
@@ -262,7 +262,7 @@ struct BusinessClientHomeView: View {
                 }
             }
             
-            // Bottom Navigation - ISSUE 3 FIXED: Uses same BottomNavigationBar as PetOwnerHomeView
+            // Bottom Navigation 
             VStack {
                 Spacer()
                 BottomNavigationBar(selectedTab: $selectedTab, appState: appState)
