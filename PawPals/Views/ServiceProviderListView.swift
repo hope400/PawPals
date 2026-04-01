@@ -1,86 +1,30 @@
 //
-//  ServiceProviderListView.swift
+//  ServiceProvidersListView.swift
 //  PawPals
 //
 //  Created by user286283 on 2/5/26.
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 struct ServiceProvidersListView: View {
     @Environment(\.dismiss) var dismiss
     @State private var searchText: String = ""
     @State private var selectedFilter: String = "All"
+    @State private var providers: [ServiceProvider] = []
+    @State private var isLoading: Bool = true
     
     let filterOptions = ["All", "Dog Walking", "Pet Sitting", "Grooming", "Training"]
-    
-    // Sample providers data
-    @State private var providers: [ServiceProvider] = [
-        ServiceProvider(
-            name: "James Rodriguez",
-            rating: 4.9,
-            reviewCount: 127,
-            services: ["Dog Walking", "Pet Sitting"],
-            pricePerHour: 25,
-            distance: 0.8,
-            bio: "Experienced dog walker with 5 years of experience. Loves all breeds!",
-            isVerified: true,
-            responseTime: "Within 1 hour"
-        ),
-        ServiceProvider(
-            name: "Sarah Mitchell",
-            rating: 5.0,
-            reviewCount: 89,
-            services: ["Pet Sitting", "Grooming"],
-            pricePerHour: 30,
-            distance: 1.2,
-            bio: "Professional pet groomer and certified animal care specialist.",
-            isVerified: true,
-            responseTime: "Within 30 min"
-        ),
-        ServiceProvider(
-            name: "Michael Chen",
-            rating: 4.8,
-            reviewCount: 156,
-            services: ["Dog Walking", "Training"],
-            pricePerHour: 35,
-            distance: 2.1,
-            bio: "Certified dog trainer specializing in positive reinforcement methods.",
-            isVerified: true,
-            responseTime: "Within 2 hours"
-        ),
-        ServiceProvider(
-            name: "Emma Thompson",
-            rating: 4.7,
-            reviewCount: 73,
-            services: ["Pet Sitting"],
-            pricePerHour: 22,
-            distance: 1.5,
-            bio: "Loving pet sitter who treats your pets like family. Available 24/7!",
-            isVerified: false,
-            responseTime: "Within 3 hours"
-        ),
-        ServiceProvider(
-            name: "David Park",
-            rating: 4.9,
-            reviewCount: 201,
-            services: ["Dog Walking", "Pet Sitting", "Training"],
-            pricePerHour: 28,
-            distance: 0.5,
-            bio: "Multi-service provider with expertise in dog training and care.",
-            isVerified: true,
-            responseTime: "Within 1 hour"
-        )
-    ]
     
     var filteredProviders: [ServiceProvider] {
         providers.filter { provider in
             let matchesSearch = searchText.isEmpty ||
                                provider.name.localizedCaseInsensitiveContains(searchText) ||
-                               provider.services.contains { $0.localizedCaseInsensitiveContains(searchText) }
+                               provider.service.contains { $0.localizedCaseInsensitiveContains(searchText) }
             
             let matchesFilter = selectedFilter == "All" ||
-                               provider.services.contains(selectedFilter)
+                               provider.service.contains(selectedFilter)
             
             return matchesSearch && matchesFilter
         }
@@ -88,7 +32,6 @@ struct ServiceProvidersListView: View {
     
     var body: some View {
         ZStack {
-            // Background
             Color(red: 0.97, green: 0.96, blue: 0.97)
                 .ignoresSafeArea()
             
@@ -111,7 +54,6 @@ struct ServiceProvidersListView: View {
                     
                     Spacer()
                     
-                    // Filter button
                     Button(action: {
                         print("Filter tapped")
                     }) {
@@ -151,7 +93,7 @@ struct ServiceProvidersListView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(filterOptions, id: \.self) { filter in
-                            FilterChip(
+                            ListFilterChip(
                                 title: filter,
                                 isSelected: selectedFilter == filter,
                                 action: {
@@ -176,25 +118,108 @@ struct ServiceProvidersListView: View {
                 .padding(.bottom, 8)
                 
                 // Providers List
-                ScrollView {
-                    VStack(spacing: 12) {
-                        ForEach(filteredProviders) { provider in
-                            NavigationLink(destination: ServiceProviderDetailView(provider: provider)) {
-                                ProviderCard(provider: provider)
+                if isLoading {
+                    VStack {
+                        Spacer()
+                        ProgressView()
+                            .scaleEffect(1.5)
+                        Text("Loading providers...")
+                            .font(.system(size: 15))
+                            .foregroundColor(.gray)
+                            .padding(.top, 12)
+                        Spacer()
+                    }
+                } else if filteredProviders.isEmpty {
+                    VStack(spacing: 16) {
+                        Spacer()
+                        Image(systemName: "person.3.fill")
+                            .font(.system(size: 64))
+                            .foregroundColor(.gray.opacity(0.3))
+                        Text("No Providers Found")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.gray)
+                        Spacer()
+                    }
+                } else {
+                    ScrollView {
+                        VStack(spacing: 12) {
+                            ForEach(filteredProviders) { provider in
+                                NavigationLink(destination: ServiceProviderDetailView(provider: provider)) {
+                                    ListProviderCard(provider: provider)
+                                }
                             }
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 20)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 20)
                 }
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            loadProviders()
+        }
+    }
+    
+    // ✅ FIXED: Correct parameter order
+    func loadProviders() {
+        isLoading = true
+        
+        let db = Firestore.firestore()
+        db.collection("serviceProviders").getDocuments { snapshot, error in
+            isLoading = false
+            
+            if let error = error {
+                print("❌ Error loading providers: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let documents = snapshot?.documents else {
+                print("No providers found")
+                providers = []
+                return
+            }
+            
+            providers = documents.compactMap { doc -> ServiceProvider? in
+                let data = doc.data()
+                
+                guard let name = data["name"] as? String else {
+                    return nil
+                }
+                
+                // Parse service - handle both String and [String]
+                let serviceData: [String]
+                if let serviceArray = data["service"] as? [String] {
+                    serviceData = serviceArray
+                } else if let serviceString = data["service"] as? String {
+                    serviceData = [serviceString]
+                } else {
+                    serviceData = []
+                }
+                
+                // ✅ CORRECT PARAMETER ORDER
+                return ServiceProvider(
+                    id: doc.documentID,
+                    name: name,
+                    service: serviceData,
+                    rating: data["rating"] as? Double ?? 0.0,
+                    hourlyRate: data["hourlyRate"] as? Double ?? 0.0,
+                    phone: data["phone"] as? String ?? "",
+                    email: data["email"] as? String ?? "",
+                    bio: data["bio"] as? String ?? "",
+                    reviewCount: data["reviewCount"] as? Int ?? 0,
+                    completedJobs: data["completedJobs"] as? Int ?? 0,
+                    memberSince: data["memberSince"] as? String ?? ""
+                )
+            }
+            
+            print("✅ Loaded \(providers.count) providers")
+        }
     }
 }
 
 // MARK: - Filter Chip
-struct FilterChip: View {
+struct ListFilterChip: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
@@ -217,36 +242,39 @@ struct FilterChip: View {
 }
 
 // MARK: - Provider Card
-struct ProviderCard: View {
+struct ListProviderCard: View {
     let provider: ServiceProvider
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
-                // Profile Picture
                 Circle()
-                    .fill(Color.gray.opacity(0.2))
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.6, green: 0.4, blue: 0.9),
+                                Color(red: 0.65, green: 0.5, blue: 0.95)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
                     .frame(width: 60, height: 60)
                     .overlay(
-                        Image(systemName: "person.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 30, height: 30)
-                            .foregroundColor(.gray.opacity(0.5))
+                        Text(String(provider.name.prefix(1)).uppercased())
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.white)
                     )
                 
-                // Info
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 6) {
                         Text(provider.name)
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.black)
                         
-                        if provider.isVerified {
-                            Image(systemName: "checkmark.seal.fill")
-                                .font(.system(size: 14))
-                                .foregroundColor(.blue)
-                        }
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(.blue)
                     }
                     
                     HStack(spacing: 8) {
@@ -266,16 +294,16 @@ struct ProviderCard: View {
                             .foregroundColor(.gray)
                         
                         HStack(spacing: 4) {
-                            Image(systemName: "location.fill")
+                            Image(systemName: "briefcase.fill")
                                 .font(.system(size: 11))
                                 .foregroundColor(.gray)
-                            Text(String(format: "%.1f mi", provider.distance))
+                            Text("\(provider.completedJobs) jobs")
                                 .font(.system(size: 13))
                                 .foregroundColor(.gray)
                         }
                     }
                     
-                    Text("$\(provider.pricePerHour)/hr")
+                    Text("$\(Int(provider.hourlyRate))/hr")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
                 }
@@ -289,8 +317,8 @@ struct ProviderCard: View {
             // Services
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    ForEach(provider.services, id: \.self) { service in
-                        Text(service)
+                    ForEach(provider.service, id: \.self) { serviceItem in
+                        Text(serviceItem)
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
                             .padding(.horizontal, 10)
@@ -301,8 +329,7 @@ struct ProviderCard: View {
                 }
             }
             
-            // Bio Preview
-            Text(provider.bio)
+            Text(provider.bio.isEmpty ? "No bio available" : provider.bio)
                 .font(.system(size: 13))
                 .foregroundColor(.gray)
                 .lineLimit(2)
@@ -312,20 +339,6 @@ struct ProviderCard: View {
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
-}
-
-// MARK: - Service Provider Model
-struct ServiceProvider: Identifiable {
-    let id = UUID()
-    let name: String
-    let rating: Double
-    let reviewCount: Int
-    let services: [String]
-    let pricePerHour: Int
-    let distance: Double
-    let bio: String
-    let isVerified: Bool
-    let responseTime: String
 }
 
 struct ServiceProvidersListView_Previews: PreviewProvider {

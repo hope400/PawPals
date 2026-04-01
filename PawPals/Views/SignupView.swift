@@ -166,16 +166,10 @@ struct SignUpView: View {
                         .disabled(authManager.isLoading || !isFormValid)
                         .opacity(isFormValid ? 1.0 : 0.6)
                         .navigationDestination(isPresented: $navigateToProfile) {
-                            UserProfileView().environmentObject(appState)
+                            ProfileView().environmentObject(appState)
                         }
                         
-                        // ADDED: Link to Edit Profile (for testing/access)
-                        NavigationLink(destination: EditProfileView().environmentObject(appState)) {
-                            Text("Edit Profile")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
-                                .padding(.top, 8)
-                        }
+                        
                     }
                     .padding(.horizontal, 24)
                     Spacer().frame(height: 40)

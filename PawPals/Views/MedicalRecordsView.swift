@@ -470,7 +470,7 @@ struct AddMedicalRecordView: View {
                                 )
                             }
                             
-                            // Weight (
+                            // Weight (if Weight record type)
                             if recordType == "Weight" {
                                 VStack(alignment: .leading, spacing: 8) {
                                     Text("Weight (lbs)")
@@ -741,6 +741,7 @@ struct MedicalRecordsView_Previews: PreviewProvider {
     static var previews: some View {
         MedicalRecordsView(
             pet: Pet(
+                id: UUID(),
                 name: "Buddy",
                 image: "dog",
                 isActive: true,

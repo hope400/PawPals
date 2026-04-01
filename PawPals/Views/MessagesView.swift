@@ -16,8 +16,8 @@ struct MessagesView: View {
     
     let filterOptions = ["All", "Unread", "Service Providers", "Support"]
     
-    @State private var conversations: [Conversation] = [
-        Conversation(
+    @State private var conversations: [ConversationItem] = [
+        ConversationItem(
             name: "James Rodriguez",
             lastMessage: "I'll be there at 2 PM for Buddy's walk!",
             timestamp: Date(),
@@ -27,7 +27,7 @@ struct MessagesView: View {
             userType: .provider,
             isOnline: true
         ),
-        Conversation(
+        ConversationItem(
             name: "Sarah Mitchell",
             lastMessage: "Thank you! Luna was so well-behaved today 😊",
             timestamp: Calendar.current.date(byAdding: .hour, value: -2, to: Date())!,
@@ -37,7 +37,7 @@ struct MessagesView: View {
             userType: .provider,
             isOnline: false
         ),
-        Conversation(
+        ConversationItem(
             name: "Dr. Emily Watson",
             lastMessage: "Buddy's checkup results look great! All healthy.",
             timestamp: Calendar.current.date(byAdding: .hour, value: -5, to: Date())!,
@@ -47,7 +47,7 @@ struct MessagesView: View {
             userType: .provider,
             isOnline: false
         ),
-        Conversation(
+        ConversationItem(
             name: "PawPals Support",
             lastMessage: "How can we help you today?",
             timestamp: Calendar.current.date(byAdding: .day, value: -1, to: Date())!,
@@ -56,33 +56,12 @@ struct MessagesView: View {
             avatar: "headphones.circle.fill",
             userType: .support,
             isOnline: true
-        ),
-        Conversation(
-            name: "Michael Chen",
-            lastMessage: "Grooming appointment confirmed for Friday",
-            timestamp: Calendar.current.date(byAdding: .day, value: -2, to: Date())!,
-            isUnread: false,
-            unreadCount: 0,
-            avatar: "person.circle.fill",
-            userType: .provider,
-            isOnline: false
-        ),
-        Conversation(
-            name: "David Park",
-            lastMessage: "Great progress in today's training session!",
-            timestamp: Calendar.current.date(byAdding: .day, value: -3, to: Date())!,
-            isUnread: false,
-            unreadCount: 0,
-            avatar: "person.circle.fill",
-            userType: .provider,
-            isOnline: true
         )
     ]
     
-    var filteredConversations: [Conversation] {
+    var filteredConversations: [ConversationItem] {
         var filtered = conversations
         
-        // Apply search filter
         if !searchText.isEmpty {
             filtered = filtered.filter { conversation in
                 conversation.name.localizedCaseInsensitiveContains(searchText) ||
@@ -90,7 +69,6 @@ struct MessagesView: View {
             }
         }
         
-        // Apply category filter
         switch selectedFilter {
         case "Unread":
             filtered = filtered.filter { $0.isUnread }
@@ -111,7 +89,6 @@ struct MessagesView: View {
     
     var body: some View {
         ZStack {
-            // Background
             Color(red: 0.97, green: 0.96, blue: 0.97)
                 .ignoresSafeArea()
             
@@ -234,10 +211,124 @@ struct MessagesView: View {
                 }
             }
             
-            // Bottom Navigation - FIXED
+            // Bottom Navigation - INLINE
             VStack {
                 Spacer()
-                BottomNavigationBar(selectedTab: $selectedTab, appState: appState)
+                
+                ZStack {
+                    RoundedRectangle(cornerRadius: 0)
+                        .fill(Color.white.opacity(0.95))
+                        .frame(height: 85)
+                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: -5)
+                        .overlay(
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(height: 1),
+                            alignment: .top
+                        )
+                    
+                    HStack {
+                        NavigationLink(destination: ContentView().environmentObject(appState)) {
+                            VStack(spacing: 4) {
+                                Image(systemName: "house.fill")
+                                    .font(.system(size: 22))
+                                    .foregroundColor(selectedTab == 0 ? Color(red: 0.6, green: 0.4, blue: 0.9) : .gray)
+                                
+                                Text("Home")
+                                    .font(.system(size: 10, weight: selectedTab == 0 ? .bold : .medium))
+                                    .foregroundColor(selectedTab == 0 ? Color(red: 0.6, green: 0.4, blue: 0.9) : .gray)
+                            }
+                        }
+                        .simultaneousGesture(TapGesture().onEnded {
+                            selectedTab = 0
+                        })
+                        
+                        Spacer()
+                        
+                        NavigationLink(destination: ScheduleView().environmentObject(appState)) {
+                            VStack(spacing: 4) {
+                                Image(systemName: "calendar")
+                                    .font(.system(size: 22))
+                                    .foregroundColor(selectedTab == 1 ? Color(red: 0.6, green: 0.4, blue: 0.9) : .gray)
+                                
+                                Text("Schedule")
+                                    .font(.system(size: 10, weight: selectedTab == 1 ? .bold : .medium))
+                                    .foregroundColor(selectedTab == 1 ? Color(red: 0.6, green: 0.4, blue: 0.9) : .gray)
+                            }
+                        }
+                        .simultaneousGesture(TapGesture().onEnded {
+                            selectedTab = 1
+                        })
+                        
+                        Spacer()
+                        
+                        Color.clear
+                            .frame(width: 56)
+                        
+                        Spacer()
+                        
+                        NavigationLink(destination: MessagesView().environmentObject(appState)) {
+                            VStack(spacing: 4) {
+                                Image(systemName: "message.fill")
+                                    .font(.system(size: 22))
+                                    .foregroundColor(selectedTab == 2 ? Color(red: 0.6, green: 0.4, blue: 0.9) : .gray)
+                                
+                                Text("Messages")
+                                    .font(.system(size: 10, weight: selectedTab == 2 ? .bold : .medium))
+                                    .foregroundColor(selectedTab == 2 ? Color(red: 0.6, green: 0.4, blue: 0.9) : .gray)
+                            }
+                        }
+                        .simultaneousGesture(TapGesture().onEnded {
+                            selectedTab = 2
+                        })
+                        
+                        Spacer()
+                        
+                        NavigationLink(destination: ProfileView()) {
+                            VStack(spacing: 4) {
+                                Image(systemName: "person.circle.fill")
+                                    .font(.system(size: 22))
+                                    .foregroundColor(selectedTab == 3 ? Color(red: 0.6, green: 0.4, blue: 0.9) : .gray)
+                                
+                                Text("Profile")
+                                    .font(.system(size: 10, weight: selectedTab == 3 ? .bold : .medium))
+                                    .foregroundColor(selectedTab == 3 ? Color(red: 0.6, green: 0.4, blue: 0.9) : .gray)
+                            }
+                        }
+                        .simultaneousGesture(TapGesture().onEnded {
+                            selectedTab = 3
+                        })
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 20)
+                    
+                    VStack {
+                        NavigationLink(destination: ServiceProvidersListView()) {
+                            Circle()
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            Color(red: 0.6, green: 0.4, blue: 0.9),
+                                            Color(red: 0.7, green: 0.5, blue: 0.95)
+                                        ]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 56, height: 56)
+                                .shadow(color: Color(red: 0.6, green: 0.4, blue: 0.9).opacity(0.4), radius: 10, x: 0, y: 5)
+                                .overlay(
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 24, weight: .bold))
+                                        .foregroundColor(.white)
+                                )
+                        }
+                        .offset(y: -24)
+                        
+                        Spacer()
+                    }
+                }
+                .frame(height: 85)
             }
         }
         .navigationBarHidden(true)
@@ -259,7 +350,7 @@ struct MessagesView: View {
     }
 }
 
-// MARK: - Message Filter Chip
+// MARK: - Message Filter Chip (OUTSIDE MessagesView)
 struct MessageFilterChip: View {
     let title: String
     let count: Int
@@ -295,13 +386,12 @@ struct MessageFilterChip: View {
     }
 }
 
-// MARK: - Conversation Row
+// MARK: - Conversation Row (OUTSIDE MessagesView)
 struct ConversationRow: View {
-    let conversation: Conversation
+    let conversation: ConversationItem
     
     var body: some View {
         HStack(spacing: 12) {
-            // Avatar with online indicator
             ZStack(alignment: .bottomTrailing) {
                 Circle()
                     .fill(Color.gray.opacity(0.2))
@@ -326,7 +416,6 @@ struct ConversationRow: View {
                 }
             }
             
-            // Message Info
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Text(conversation.name)
@@ -383,8 +472,8 @@ struct ConversationRow: View {
     }
 }
 
-// MARK: - Conversation Model
-struct Conversation: Identifiable {
+// MARK: - Conversation Model (OUTSIDE MessagesView)
+struct ConversationItem: Identifiable {
     let id = UUID()
     let name: String
     let lastMessage: String
@@ -402,13 +491,11 @@ enum UserType {
     case petOwner
 }
 
-// MARK: - Chat Detail View
+// MARK: - Chat Detail View (OUTSIDE MessagesView)
 struct ChatDetailView: View {
-    let conversation: Conversation
+    let conversation: ConversationItem
     @Environment(\.dismiss) var dismiss
     @State private var messageText: String = ""
-    
-    // Sample chat messages for each conversation
     @State private var messages: [ChatMessage] = []
     
     var body: some View {
@@ -466,7 +553,6 @@ struct ChatDetailView: View {
                 // Messages Area
                 ScrollView {
                     VStack(spacing: 12) {
-                        // Date Divider
                         Text("Today")
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(.gray)
@@ -476,9 +562,8 @@ struct ChatDetailView: View {
                             .cornerRadius(12)
                             .padding(.top, 16)
                         
-                        // Chat Messages
                         ForEach(messages) { message in
-                            MessageBubble(message: message)
+                            ChatMessageBubble(message: message)
                         }
                     }
                     .padding(.horizontal, 16)
@@ -487,7 +572,6 @@ struct ChatDetailView: View {
                 
                 // Message Input
                 HStack(spacing: 12) {
-                    // Attachment button
                     Button(action: {
                         print("Attach file")
                     }) {
@@ -496,7 +580,6 @@ struct ChatDetailView: View {
                             .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
                     }
                     
-                    // Text field
                     HStack {
                         TextField("Type a message...", text: $messageText)
                             .font(.system(size: 16))
@@ -506,7 +589,6 @@ struct ChatDetailView: View {
                     .background(Color.white)
                     .cornerRadius(20)
                     
-                    // Send button
                     Button(action: sendMessage) {
                         Circle()
                             .fill(
@@ -535,8 +617,10 @@ struct ChatDetailView: View {
     }
     
     func loadMessages() {
-        // Load conversation-specific messages
-        messages = getChatMessages(for: conversation.name)
+        messages = [
+            ChatMessage(text: "Hi there!", isFromMe: true, timestamp: Date()),
+            ChatMessage(text: "Hello! How can I help you?", isFromMe: false, timestamp: Date())
+        ]
     }
     
     func sendMessage() {
@@ -551,89 +635,19 @@ struct ChatDetailView: View {
         messages.append(newMessage)
         messageText = ""
         
-        // Simulate response after 2 seconds
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             let response = ChatMessage(
-                text: getAutoResponse(for: conversation.name),
+                text: "Thanks for your message!",
                 isFromMe: false,
                 timestamp: Date()
             )
             messages.append(response)
         }
     }
-    
-    func getChatMessages(for name: String) -> [ChatMessage] {
-        switch name {
-        case "James Rodriguez":
-            return [
-                ChatMessage(text: "Hi! Are we still on for Buddy's walk today?", isFromMe: true, timestamp: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!),
-                ChatMessage(text: "Yes! I'll be there at 2 PM for Buddy's walk!", isFromMe: false, timestamp: Calendar.current.date(byAdding: .minute, value: -50, to: Date())!),
-                ChatMessage(text: "Perfect! He's really excited 🐕", isFromMe: true, timestamp: Calendar.current.date(byAdding: .minute, value: -45, to: Date())!),
-                ChatMessage(text: "Great! I'll bring some treats. See you soon!", isFromMe: false, timestamp: Date())
-            ]
-            
-        case "Sarah Mitchell":
-            return [
-                ChatMessage(text: "How was Luna today?", isFromMe: true, timestamp: Calendar.current.date(byAdding: .hour, value: -3, to: Date())!),
-                ChatMessage(text: "Thank you! Luna was so well-behaved today 😊", isFromMe: false, timestamp: Calendar.current.date(byAdding: .hour, value: -2, to: Date())!),
-                ChatMessage(text: "She played nicely with the other dogs and took a good nap.", isFromMe: false, timestamp: Calendar.current.date(byAdding: .hour, value: -2, to: Date())!),
-                ChatMessage(text: "That's wonderful! Thank you so much!", isFromMe: true, timestamp: Calendar.current.date(byAdding: .minute, value: -100, to: Date())!)
-            ]
-            
-        case "Dr. Emily Watson":
-            return [
-                ChatMessage(text: "Hi Dr. Watson, checking on Buddy's test results", isFromMe: true, timestamp: Calendar.current.date(byAdding: .hour, value: -6, to: Date())!),
-                ChatMessage(text: "Hello! I have good news.", isFromMe: false, timestamp: Calendar.current.date(byAdding: .hour, value: -5, to: Date())!),
-                ChatMessage(text: "Buddy's checkup results look great! All healthy.", isFromMe: false, timestamp: Calendar.current.date(byAdding: .hour, value: -5, to: Date())!),
-                ChatMessage(text: "His heart, lungs, and blood work are all perfect.", isFromMe: false, timestamp: Calendar.current.date(byAdding: .hour, value: -5, to: Date())!),
-                ChatMessage(text: "That's such a relief! Thank you! 🙏", isFromMe: true, timestamp: Calendar.current.date(byAdding: .hour, value: -4, to: Date())!)
-            ]
-            
-        case "PawPals Support":
-            return [
-                ChatMessage(text: "Hi, I have a question about booking cancellations", isFromMe: true, timestamp: Calendar.current.date(byAdding: .day, value: -1, to: Date())!),
-                ChatMessage(text: "Hello! I'd be happy to help you with that.", isFromMe: false, timestamp: Calendar.current.date(byAdding: .day, value: -1, to: Date())!),
-                ChatMessage(text: "How can we help you today?", isFromMe: false, timestamp: Calendar.current.date(byAdding: .day, value: -1, to: Date())!)
-            ]
-            
-        case "Michael Chen":
-            return [
-                ChatMessage(text: "Hi Michael, I'd like to book a grooming session", isFromMe: true, timestamp: Calendar.current.date(byAdding: .day, value: -2, to: Date())!),
-                ChatMessage(text: "Sure! I have Friday afternoon available.", isFromMe: false, timestamp: Calendar.current.date(byAdding: .day, value: -2, to: Date())!),
-                ChatMessage(text: "Grooming appointment confirmed for Friday", isFromMe: false, timestamp: Calendar.current.date(byAdding: .day, value: -2, to: Date())!),
-                ChatMessage(text: "Perfect! See you then!", isFromMe: true, timestamp: Calendar.current.date(byAdding: .day, value: -2, to: Date())!)
-            ]
-            
-        case "David Park":
-            return [
-                ChatMessage(text: "How did the training go today?", isFromMe: true, timestamp: Calendar.current.date(byAdding: .day, value: -3, to: Date())!),
-                ChatMessage(text: "Great progress in today's training session!", isFromMe: false, timestamp: Calendar.current.date(byAdding: .day, value: -3, to: Date())!),
-                ChatMessage(text: "Luna is really mastering the 'stay' command.", isFromMe: false, timestamp: Calendar.current.date(byAdding: .day, value: -3, to: Date())!),
-                ChatMessage(text: "That's amazing! She's learning so fast!", isFromMe: true, timestamp: Calendar.current.date(byAdding: .day, value: -3, to: Date())!)
-            ]
-            
-        default:
-            return [
-                ChatMessage(text: "Hi there!", isFromMe: true, timestamp: Date()),
-                ChatMessage(text: "Hello! How can I help you?", isFromMe: false, timestamp: Date())
-            ]
-        }
-    }
-    
-    func getAutoResponse(for name: String) -> String {
-        let responses = [
-            "Thanks for your message!",
-            "Got it, I'll take care of that.",
-            "Sounds good!",
-            "Perfect, see you soon!",
-            "I'll get back to you shortly."
-        ]
-        return responses.randomElement() ?? "Thanks!"
-    }
 }
 
-// MARK: - Message Bubble
-struct MessageBubble: View {
+// MARK: - Chat Message Bubble (OUTSIDE MessagesView - Renamed to avoid conflicts)
+struct ChatMessageBubble: View {
     let message: ChatMessage
     
     var body: some View {
@@ -678,14 +692,6 @@ struct MessageBubble: View {
             }
         }
     }
-}
-
-// MARK: - Chat Message Model
-struct ChatMessage: Identifiable {
-    let id = UUID()
-    let text: String
-    let isFromMe: Bool
-    let timestamp: Date
 }
 
 struct MessagesView_Previews: PreviewProvider {

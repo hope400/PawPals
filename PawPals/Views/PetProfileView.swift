@@ -1,10 +1,3 @@
-//
-//  PetProfileView.swift
-//  PawPals
-//
-//  Created by user286283 on 2/5/26.
-//
-
 import SwiftUI
 
 struct PetProfileView: View {
@@ -27,54 +20,97 @@ struct PetProfileView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Top Header
-                HStack {
+                // Top Header - FIXED WITH VISIBLE BACK BUTTON
+                HStack(spacing: 0) {
+                    // Back button - LEFT
                     Button(action: {
                         dismiss()
                     }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 22, weight: .semibold))
-                            .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
+                            
+                            Text("Back")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
+                        }
+                        .padding(.leading, 16)
+                        .frame(width: 100, alignment: .leading)
                     }
                     
                     Spacer()
                     
+                    // Title - CENTER
                     Text("Pet Details")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.black)
                     
                     Spacer()
                     
-                    // Edit button
+                    // Edit button - RIGHT
                     NavigationLink(destination: EditPetView(pet: pet)) {
                         Circle()
                             .fill(Color(red: 0.6, green: 0.4, blue: 0.9).opacity(0.1))
-                            .frame(width: 48, height: 48)
+                            .frame(width: 40, height: 40)
                             .overlay(
                                 Image(systemName: "pencil")
                                     .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
-                                    .font(.system(size: 18, weight: .semibold))
+                                    .font(.system(size: 16, weight: .semibold))
                             )
                     }
+                    .padding(.trailing, 16)
+                    .frame(width: 100, alignment: .trailing)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(Color(red: 0.97, green: 0.96, blue: 0.97).opacity(0.9))
+                .frame(height: 50)
+                .background(Color(red: 0.97, green: 0.96, blue: 0.97))
+                .overlay(
+                    Rectangle()
+                        .fill(Color(red: 0.6, green: 0.4, blue: 0.9).opacity(0.1))
+                        .frame(height: 1),
+                    alignment: .bottom
+                )
                 
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Pet Image
+                        // Pet Image with AsyncImage
                         ZStack {
                             RoundedRectangle(cornerRadius: 12)
                                 .fill(Color(red: 0.6, green: 0.4, blue: 0.9).opacity(0.2))
                                 .frame(height: 320)
                             
-                            // Placeholder
-                            Image(systemName: "pawprint.fill")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 80, height: 80)
-                                .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9).opacity(0.5))
+                            // Display image if available
+                            if let imageURL = pet.imageURL, !imageURL.isEmpty {
+                                AsyncImage(url: URL(string: imageURL)) { phase in
+                                    switch phase {
+                                    case .empty:
+                                        ProgressView()
+                                            .frame(height: 320)
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(height: 320)
+                                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    case .failure:
+                                        // Fallback to placeholder on error
+                                        Image(systemName: "pawprint.fill")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 80, height: 80)
+                                            .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9).opacity(0.5))
+                                    @unknown default:
+                                        EmptyView()
+                                    }
+                                }
+                            } else {
+                                // Placeholder if no image
+                                Image(systemName: "pawprint.fill")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 80, height: 80)
+                                    .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9).opacity(0.5))
+                            }
                         }
                         .padding(.horizontal, 16)
                         .padding(.top, 12)
@@ -106,7 +142,7 @@ struct PetProfileView: View {
                         .padding(.horizontal, 16)
                         .padding(.top, 16)
                         
-                        // Info 
+                        // Info Chips
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 12) {
                                 if pet.isSterilized {
@@ -132,7 +168,7 @@ struct PetProfileView: View {
                                 .font(.system(size: 18, weight: .bold))
                                 .foregroundColor(.black)
                             
-                            Text(pet.bio.isEmpty ? "\(pet.name) is a wonderful companion!" : pet.bio)
+                            Text("\(pet.name) is a wonderful companion!")
                                 .font(.system(size: 14))
                                 .foregroundColor(.gray)
                                 .lineSpacing(4)
@@ -305,6 +341,16 @@ struct MedicalInfoRow: View {
 
 struct PetProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        PetProfileView(pet: Pet(name: "Buddy", image: "dog-buddy", isActive: true))
+        PetProfileView(pet: Pet(
+            id: UUID(),
+            name: "Buddy",
+            image: "dog-buddy",
+            isActive: true,
+            species: "Dog",
+            breed: "Golden Retriever",
+            birthday: "01/15/2023",
+            gender: "Male",
+            imageURL: "https://firebasestorage.googleapis.com/..."
+        ))
     }
 }

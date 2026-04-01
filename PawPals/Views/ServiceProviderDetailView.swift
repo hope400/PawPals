@@ -4,6 +4,7 @@
 //
 //  Created by user286283 on 2/5/26.
 //
+
 import SwiftUI
 
 struct ServiceProviderDetailView: View {
@@ -12,7 +13,6 @@ struct ServiceProviderDetailView: View {
     
     var body: some View {
         ZStack {
-            // Background
             Color(red: 0.97, green: 0.96, blue: 0.97)
                 .ignoresSafeArea()
             
@@ -35,7 +35,6 @@ struct ServiceProviderDetailView: View {
                     
                     Spacer()
                     
-                    // Favorite button
                     Button(action: {
                         print("Favorite tapped")
                     }) {
@@ -57,41 +56,42 @@ struct ServiceProviderDetailView: View {
                     VStack(spacing: 20) {
                         // Profile Header
                         VStack(spacing: 16) {
-                            // Profile Picture
                             ZStack(alignment: .bottomTrailing) {
                                 Circle()
-                                    .fill(Color.gray.opacity(0.2))
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [
+                                                Color(red: 0.6, green: 0.4, blue: 0.9),
+                                                Color(red: 0.65, green: 0.5, blue: 0.95)
+                                            ]),
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
                                     .frame(width: 120, height: 120)
                                     .overlay(
-                                        Image(systemName: "person.fill")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 60, height: 60)
-                                            .foregroundColor(.gray.opacity(0.5))
+                                        Text(String(provider.name.prefix(1)).uppercased())
+                                            .font(.system(size: 48, weight: .bold))
+                                            .foregroundColor(.white)
                                     )
                                     .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                                 
-                                if provider.isVerified {
-                                    Circle()
-                                        .fill(Color.blue)
-                                        .frame(width: 32, height: 32)
-                                        .overlay(
-                                            Image(systemName: "checkmark")
-                                                .foregroundColor(.white)
-                                                .font(.system(size: 16, weight: .bold))
-                                        )
-                                        .offset(x: -5, y: -5)
-                                }
+                                Circle()
+                                    .fill(Color.blue)
+                                    .frame(width: 32, height: 32)
+                                    .overlay(
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(.white)
+                                            .font(.system(size: 16, weight: .bold))
+                                    )
+                                    .offset(x: -5, y: -5)
                             }
                             .padding(.top, 16)
                             
-                            // Name and Rating
                             VStack(spacing: 8) {
-                                HStack(spacing: 8) {
-                                    Text(provider.name)
-                                        .font(.system(size: 24, weight: .bold))
-                                        .foregroundColor(.black)
-                                }
+                                Text(provider.name)
+                                    .font(.system(size: 24, weight: .bold))
+                                    .foregroundColor(.black)
                                 
                                 HStack(spacing: 12) {
                                     HStack(spacing: 4) {
@@ -110,10 +110,10 @@ struct ServiceProviderDetailView: View {
                                         .foregroundColor(.gray)
                                     
                                     HStack(spacing: 4) {
-                                        Image(systemName: "location.fill")
+                                        Image(systemName: "briefcase.fill")
                                             .font(.system(size: 14))
                                             .foregroundColor(.gray)
-                                        Text(String(format: "%.1f mi away", provider.distance))
+                                        Text("\(provider.completedJobs) jobs")
                                             .font(.system(size: 14))
                                             .foregroundColor(.gray)
                                     }
@@ -126,15 +126,15 @@ struct ServiceProviderDetailView: View {
                         HStack(spacing: 12) {
                             QuickInfoCard(
                                 icon: "clock.fill",
-                                title: "Response",
-                                value: provider.responseTime,
+                                title: "Member Since",
+                                value: provider.memberSince,
                                 color: .blue
                             )
                             
                             QuickInfoCard(
                                 icon: "dollarsign.circle.fill",
                                 title: "Rate",
-                                value: "$\(provider.pricePerHour)/hr",
+                                value: "$\(Int(provider.hourlyRate))/hr",
                                 color: .green
                             )
                         }
@@ -149,8 +149,8 @@ struct ServiceProviderDetailView: View {
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
-                                    ForEach(provider.services, id: \.self) { service in
-                                        ServiceBadge(service: service)
+                                    ForEach(provider.service, id: \.self) { serviceItem in
+                                        ServiceBadge(service: serviceItem)
                                     }
                                 }
                                 .padding(.horizontal, 16)
@@ -163,7 +163,7 @@ struct ServiceProviderDetailView: View {
                                 .font(.system(size: 18, weight: .bold))
                                 .foregroundColor(.black)
                             
-                            Text(provider.bio)
+                            Text(provider.bio.isEmpty ? "No bio available" : provider.bio)
                                 .font(.system(size: 15))
                                 .foregroundColor(.gray)
                                 .lineSpacing(6)
@@ -175,36 +175,28 @@ struct ServiceProviderDetailView: View {
                         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                         .padding(.horizontal, 16)
                         
-                        // Experience & Skills
+                        // Contact Information
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Experience & Skills")
+                            Text("Contact Information")
                                 .font(.system(size: 18, weight: .bold))
                                 .foregroundColor(.black)
                             
                             VStack(spacing: 10) {
-                                ExperienceRow(
-                                    icon: "calendar",
-                                    title: "5+ years experience",
-                                    color: .purple
-                                )
+                                if !provider.phone.isEmpty {
+                                    ContactRow(
+                                        icon: "phone.fill",
+                                        title: provider.phone,
+                                        color: .green
+                                    )
+                                }
                                 
-                                ExperienceRow(
-                                    icon: "checkmark.shield.fill",
-                                    title: "Background checked",
-                                    color: .green
-                                )
-                                
-                                ExperienceRow(
-                                    icon: "heart.text.square.fill",
-                                    title: "Pet First Aid certified",
-                                    color: .red
-                                )
-                                
-                                ExperienceRow(
-                                    icon: "house.fill",
-                                    title: "Pet-friendly home",
-                                    color: .blue
-                                )
+                                if !provider.email.isEmpty {
+                                    ContactRow(
+                                        icon: "envelope.fill",
+                                        title: provider.email,
+                                        color: .blue
+                                    )
+                                }
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -214,37 +206,29 @@ struct ServiceProviderDetailView: View {
                         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                         .padding(.horizontal, 16)
                         
-                        // Reviews Section
+                        // Stats Section
                         VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Text("Reviews")
-                                    .font(.system(size: 18, weight: .bold))
-                                    .foregroundColor(.black)
-                                
-                                Spacer()
-                                
-                                Button(action: {
-                                    print("See all reviews")
-                                }) {
-                                    Text("See All")
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.9))
-                                }
-                            }
+                            Text("Provider Stats")
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundColor(.black)
                             
-                            VStack(spacing: 12) {
-                                ReviewCard(
-                                    name: "Sarah J.",
-                                    rating: 5.0,
-                                    date: "2 days ago",
-                                    comment: "James is absolutely wonderful with dogs! My Buddy loved his walk and came home happy and tired. Highly recommend!"
+                            VStack(spacing: 10) {
+                                StatsRow(
+                                    icon: "checkmark.circle.fill",
+                                    title: "\(provider.completedJobs) jobs completed",
+                                    color: .green
                                 )
                                 
-                                ReviewCard(
-                                    name: "Michael T.",
-                                    rating: 5.0,
-                                    date: "1 week ago",
-                                    comment: "Very professional and reliable. Great communication and really cares about the pets."
+                                StatsRow(
+                                    icon: "star.fill",
+                                    title: String(format: "%.1f average rating", provider.rating),
+                                    color: .orange
+                                )
+                                
+                                StatsRow(
+                                    icon: "person.2.fill",
+                                    title: "\(provider.reviewCount) happy customers",
+                                    color: .purple
                                 )
                             }
                         }
@@ -263,9 +247,8 @@ struct ServiceProviderDetailView: View {
                 // Bottom Actions
                 VStack(spacing: 0) {
                     HStack(spacing: 12) {
-                        // Message Button
                         Button(action: {
-                            print("Message tapped")
+                            print("Message \(provider.name)")
                         }) {
                             Image(systemName: "message.fill")
                                 .font(.system(size: 20))
@@ -275,10 +258,7 @@ struct ServiceProviderDetailView: View {
                                 .cornerRadius(12)
                         }
                         
-                        // Book Now Button
-                        Button(action: {
-                            print("Book now tapped")
-                        }) {
+                        NavigationLink(destination: BookingView(provider: provider)) {
                             Text("Book Now")
                                 .font(.system(size: 18, weight: .bold))
                                 .foregroundColor(.white)
@@ -346,7 +326,8 @@ struct ServiceBadge: View {
         case "Pet Sitting": return "house.fill"
         case "Grooming": return "scissors"
         case "Training": return "person.fill.checkmark"
-        default: return "star.fill"
+        case "Veterinary": return "cross.case.fill"
+        default: return "pawprint.fill"
         }
     }
     
@@ -370,8 +351,8 @@ struct ServiceBadge: View {
     }
 }
 
-// MARK: - Experience Row
-struct ExperienceRow: View {
+// MARK: - Contact Row
+struct ContactRow: View {
     let icon: String
     let title: String
     let color: Color
@@ -392,72 +373,44 @@ struct ExperienceRow: View {
     }
 }
 
-// MARK: - Review Card
-struct ReviewCard: View {
-    let name: String
-    let rating: Double
-    let date: String
-    let comment: String
+// MARK: - Stats Row
+struct StatsRow: View {
+    let icon: String
+    let title: String
+    let color: Color
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Circle()
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(width: 40, height: 40)
-                    .overlay(
-                        Text(String(name.prefix(1)))
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.gray)
-                    )
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(name)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.black)
-                    
-                    HStack(spacing: 8) {
-                        HStack(spacing: 2) {
-                            ForEach(0..<5) { index in
-                                Image(systemName: index < Int(rating) ? "star.fill" : "star")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.orange)
-                            }
-                        }
-                        
-                        Text(date)
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray)
-                    }
-                }
-                
-                Spacer()
-            }
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .foregroundColor(color)
+                .frame(width: 24)
             
-            Text(comment)
-                .font(.system(size: 14))
-                .foregroundColor(.gray)
-                .lineSpacing(4)
+            Text(title)
+                .font(.system(size: 15))
+                .foregroundColor(.black)
+            
+            Spacer()
         }
-        .padding(12)
-        .background(Color(red: 0.97, green: 0.96, blue: 0.97))
-        .cornerRadius(8)
     }
 }
 
+// ✅ FIXED PREVIEW
 struct ServiceProviderDetailView_Previews: PreviewProvider {
     static var previews: some View {
         ServiceProviderDetailView(
             provider: ServiceProvider(
+                id: "1",
                 name: "James Rodriguez",
+                service: ["Dog Walking", "Pet Sitting"],  // ✅ FIXED: service (singular, array)
                 rating: 4.9,
+                hourlyRate: 25.0,
+                phone: "(555) 123-4567",
+                email: "james@example.com",
+                bio: "Experienced dog walker with 5 years of experience.",
                 reviewCount: 127,
-                services: ["Dog Walking", "Pet Sitting"],
-                pricePerHour: 25,
-                distance: 0.8,
-                bio: "Experienced dog walker with 5 years of experience. Loves all breeds!",
-                isVerified: true,
-                responseTime: "Within 1 hour"
+                completedJobs: 243,
+                memberSince: "2023"
             )
         )
     }
